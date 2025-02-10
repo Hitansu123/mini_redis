@@ -11,26 +11,31 @@ import (
 func main() {
 	fmt.Println("Enter your text")
 
-	hash := make(map[string]string)
-	var wg sync.WaitGroup
+	var hash sync.Map
+	//var wg sync.WaitGroup
 
 	for {
 		Input := bufio.NewReader(os.Stdin)
 		UserInput, _ := Input.ReadString('\n')
-		Splits := strings.Split(UserInput, " ")
+		newInput := strings.TrimSpace(UserInput)
+		Splits := strings.Split(newInput, " ")
 		if Splits[0] == "Ping" {
 
 			fmt.Println("Pong")
 		} else if Splits[0] == "SET" {
-			wg.Add(1)
-			go setvalue(&hash, Splits, &wg)
+			setvalue(&hash, Splits)
+		} else if Splits[0] == "GET" {
+			key := Splits[1]
+			value, ok := hash.Load(key)
+			if ok {
+				fmt.Println(value)
+			} else {
+				fmt.Println("Key does not exsist")
+			}
 		}
 	}
 }
 
-func setvalue(hash *map[string]string, Splits []string, wg *sync.WaitGroup) {
-	defer wg.Done()
-	(*hash)[Splits[1]] = strings.Join(Splits[2:], " ")
-	wg.Wait()
-
+func setvalue(hash *sync.Map, Splits []string) {
+	hash.Store(Splits[1], strings.Join(Splits[2:], " "))
 }
