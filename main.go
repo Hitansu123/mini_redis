@@ -6,9 +6,12 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 )
 
 func main() {
+	Server := NewServer(":3000")
+	Server.Start()
 	fmt.Println("Enter your text")
 
 	var hash sync.Map
@@ -25,19 +28,40 @@ func main() {
 		case "SET":
 			setvalue(&hash, Splits)
 		case "GET":
-			key := Splits[1]
-			value, ok := hash.Load(key)
-			if ok {
-				fmt.Println(value)
-			} else {
-				fmt.Println("Key does not exsist")
-			}
+			GetKey(&hash, Splits)
 		case "DEL":
 			wg.Add(1)
 			go deleteData(Splits[1], &hash, &wg)
 
+		case "EXPIRE":
+			SetExpire(&hash, Splits, &wg)
 		}
 		wg.Wait()
+	}
+}
+
+func SetExpire(hash *sync.Map, Splits []string, wg *sync.WaitGroup) {
+	key := Splits[1]
+	_, ok := hash.Load(key)
+	if ok {
+		duration, _ := time.ParseDuration(Splits[2] + "s")
+		//ExpirationTime := time.Now().Add(duration)
+		time.AfterFunc(duration, func() {
+			wg.Add(1)
+			deleteData(key, hash, wg)
+		})
+	} else {
+		fmt.Println("Key does not exsist")
+	}
+}
+
+func GetKey(hash *sync.Map, Splits []string) {
+	key := Splits[1]
+	value, ok := hash.Load(key)
+	if ok {
+		fmt.Println(value)
+	} else {
+		fmt.Println("Key does not exsist")
 	}
 }
 
