@@ -1,13 +1,19 @@
 package main
 
 import (
+	"Building_Redis/database"
+	"Building_Redis/persistance"
 	"bufio"
 	"fmt"
 	"os"
+
+	//"strconv"
 	"strings"
 	"sync"
 	"time"
-	"Building_Redis/database"
+	"log"
+
+	//"github.com/charmbracelet/log"
 )
 
 func main() {
@@ -23,6 +29,7 @@ func main() {
 	//}()
 	var hash sync.Map
 
+	persistance.Retrive()
 	for {
 		Input := bufio.NewReader(os.Stdin)
 		UserInput, _ := Input.ReadString('\n')
@@ -82,5 +89,9 @@ func deleteData(key string, hash *sync.Map, wg *sync.WaitGroup) {
 }
 
 func setvalue(hash *sync.Map, Splits []string) {
-	hash.Store(Splits[1], strings.Join(Splits[2:], " "))
+	if len(Splits)<4{
+		log.Fatal("Please add Time to live after value")
+	}
+	hash.Store(Splits[1],Splits[2])
+	database.AddToDatabase(Splits[1],Splits[2],Splits[3])
 }

@@ -8,27 +8,33 @@ import (
 )
 type record struct {
 	Keys_data string 
-	Values string 
+	Values string
+	TTL int
+	ExpireAt time.Time
 }
 
 func Rdb_snapshort(db *gorm.DB) {
 	var Record []record
 	
-	ticker:=time.NewTicker(5*time.Second)
+	ticker:=time.NewTicker(20*time.Second)
 	defer ticker.Stop()
 
-	results:=db.Raw("SELECT * FROM data").Scan(&Record)
-	//results:=db.Table("data").Find(&recordes)
-	if results.Error!=nil{
-		fmt.Println("Error in query",results.Error)
-	}
-
-	for {
+		for {
 		select{
 		case <-ticker.C:
-			fmt.Println("Saving")
+			var newRecord []record
+			results:=db.Raw("SELECT * FROM data").Scan(&newRecord)
+	//results:=db.Table("data").Find(&recordes)
+			if results.Error!=nil{
+				fmt.Println("Error in query",results.Error)
+				continue
+			}
+			Record=append(Record, newRecord...)
+
+			//fmt.Println("Saving")
 			Store(Record)
 		}
+		//fmt.Println(Record)
 		
 	}
 	
