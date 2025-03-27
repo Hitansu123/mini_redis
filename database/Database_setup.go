@@ -1,6 +1,7 @@
 package database
 
 import (
+	"Building_Redis/persistance"
 	"fmt"
 
 	"gorm.io/driver/sqlite"
@@ -9,7 +10,7 @@ import (
 
 
 type Data struct{
-	Keys string `gorm:"primarykey"`
+	Keys_data string 
 	Values string
 }
 func Sqlite_setup(){
@@ -19,8 +20,14 @@ func Sqlite_setup(){
 		fmt.Println("error opening database")
 	}
 	db.AutoMigrate(&Data{})
-	test:=Data{Keys: "test", Values: "test"}
-	db.Create(test)
+	//test:=Data{Keys_data: "test1", Values: "testvalue"}
+	//result:=db.Create(&test)
+	//if result.Error!=nil{
+		//fmt.Println("Insert error")
+	//}
+	fmt.Println("Inserted rows")
+
+	go persistance.Rdb_snapshort(db)
 
 	
 
