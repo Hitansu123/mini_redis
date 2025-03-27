@@ -7,15 +7,21 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"Building_Redis/database"
 )
 
 func main() {
-	Server := NewServer(":3000")
-	Server.Start()
-	fmt.Println("Enter your text")
-
-	var hash sync.Map
+	
+	database.Sqlite_setup()
 	var wg sync.WaitGroup
+
+	//erver := NewServer(":3000")
+	//go func() { // Start the server in a separate goroutine
+	//	if err := Server.Start(); err != nil {
+	//fmt.Println("Server error:", err)
+	//}
+	//}()
+	var hash sync.Map
 
 	for {
 		Input := bufio.NewReader(os.Stdin)

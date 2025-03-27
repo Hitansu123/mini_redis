@@ -18,6 +18,7 @@ func NewServer(listenAddr string) *Server {
 	}
 }
 func (s *Server) Start() error {
+
 	ln, err := net.Listen("tcp", s.listenAddr)
 	if err != nil {
 		return err
