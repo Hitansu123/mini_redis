@@ -3,7 +3,7 @@ package persistance
 import (
 	"fmt"
 	"time"
-
+	"Building_Redis/secondaryDB"
 	"gorm.io/gorm"
 )
 type record struct {
@@ -14,7 +14,7 @@ type record struct {
 }
 
 func Rdb_snapshort(db *gorm.DB) {
-	var Record []record
+	//var Record []record
 	
 	ticker:=time.NewTicker(20*time.Second)
 	defer ticker.Stop()
@@ -22,17 +22,9 @@ func Rdb_snapshort(db *gorm.DB) {
 		for {
 		select{
 		case <-ticker.C:
-			var newRecord []record
-			results:=db.Raw("SELECT * FROM data").Scan(&newRecord)
-	//results:=db.Table("data").Find(&recordes)
-			if results.Error!=nil{
-				fmt.Println("Error in query",results.Error)
-				continue
-			}
-			Record=append(Record, newRecord...)
-
-			//fmt.Println("Saving")
-			Store(Record)
+			secondaryDB.DeleteFromDB()
+			fmt.Println("Saving")
+			secondaryDB.Store_SecondDB()	
 		}
 		//fmt.Println(Record)
 		

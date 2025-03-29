@@ -18,7 +18,7 @@ import (
 
 func main() {
 	
-	database.Sqlite_setup()
+	db:=database.Sqlite_setup()
 	var wg sync.WaitGroup
 
 	//erver := NewServer(":3000")
@@ -29,7 +29,9 @@ func main() {
 	//}()
 	var hash sync.Map
 
-	persistance.Retrive()
+	wg.Add(1)
+	go persistance.Rdb_snapshort(db)
+	wg.Wait()
 	for {
 		Input := bufio.NewReader(os.Stdin)
 		UserInput, _ := Input.ReadString('\n')
@@ -70,6 +72,9 @@ func SetExpire(hash *sync.Map, Splits []string, wg *sync.WaitGroup) {
 
 func GetKey(hash *sync.Map, Splits []string) {
 	key := Splits[1]
+	
+	vals,_:=hash.Load("Keys_data")
+	fmt.Println(vals)	
 	value, ok := hash.Load(key)
 	if ok {
 		fmt.Println(value)
