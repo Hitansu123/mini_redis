@@ -1,8 +1,10 @@
 package database
 
 import (
+	"Building_Redis/models"
 	"fmt"
 	"time"
+
 	//"time"
 
 	"gorm.io/driver/sqlite"
@@ -22,7 +24,7 @@ func Sqlite_setup() *gorm.DB{
 	if err!=nil{
 		fmt.Println("error opening database")
 	}
-	db.AutoMigrate(&Data{})
+	db.AutoMigrate(&Data{},&models.Hash{},&models.Set{},&models.List{})
 	//go persistance.Rdb_snapshort(db)
 
 	return db	

@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"fmt"
 
+	"Building_Redis/implement_datastructure/lists"
 	"os"
 
 	//"strconv"
@@ -22,17 +23,20 @@ func LoadData(hash *sync.Map,wg *sync.WaitGroup){
 	//defer wg.Done()
 	record:=secondaryDB.GetData()
 	if record==nil{
-		fmt.Println("error")
+		fmt.Println("Key does not exsist")
+		return
 	}
 	for _,val:=range record{
 		hash.Store(val.Keys_data,val.Values)
 	}
-	fmt.Println("working")
+	//fmt.Println("working")
 }
 
 func main() {
 	
 	db:=database.Sqlite_setup()
+
+	database.DelExpireData()
 	var wg sync.WaitGroup
 
 	//erver := NewServer(":3000")
@@ -64,6 +68,14 @@ func main() {
 			}()
 		case "EXPIRE":
 			SetExpire(&hash, Splits, &wg)
+		case "LPUSH":
+			lists.LPush(Splits[1], Splits[2])
+		case "LPOP":
+			//LPop(Splits[1])
+		case "RPUSH":
+			lists.RPush(Splits[1], Splits[2])
+		case "LRANGE":
+			lists.LRange(Splits[1])
 		}
 	}
 }
@@ -85,7 +97,7 @@ func SetExpire(hash *sync.Map, Splits []string, wg *sync.WaitGroup) {
 
 func GetKey(hash *sync.Map, Splits []string,wg *sync.WaitGroup) {
 	
-	fmt.Println("pk")
+	//fmt.Println("pk")
 	wg.Add(1)
 	go func() {
 			go LoadData(hash,wg)

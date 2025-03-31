@@ -16,9 +16,7 @@ func AddToDatabase(key, value ,ttl string,wg *sync.WaitGroup){
 	if err!=nil{
 		fmt.Println("Error in conversion",err)
 	}
-	min:=time.Now().Minute()
-	exptime:=min+int(ttlInt)
-	expireAt:=time.Now().Add(time.Duration(exptime))
+	expireAt:=time.Now().Add(time.Duration(ttlInt)*time.Second)
 	test:=Data{Keys_data: key, Values: value,TTL: int(ttlInt),ExpireAt: expireAt}
 	result:=db.Create(&test)
 	if result.Error!=nil{

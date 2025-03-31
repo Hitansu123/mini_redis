@@ -1,6 +1,7 @@
 package secondaryDB
 
 import (
+	"Building_Redis/models"
 	"fmt"
 	"time"
 
@@ -22,7 +23,7 @@ func Setup_secondDB() *gorm.DB{
 	if err!=nil{
 		fmt.Println("error opening database")
 	}
-	db.AutoMigrate(&record{})
+	db.AutoMigrate(&record{},models.Hash{},&models.Set{},&models.List{})
 	//go persistance.Rdb_snapshort(db)
 
 	return db	

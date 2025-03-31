@@ -1,6 +1,9 @@
 package secondaryDB
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 
 func GetData() []record{
@@ -8,6 +11,17 @@ func GetData() []record{
 	var secondDb []record		
 	db.Raw("SELECT * from records").Scan(&secondDb)
 	
-	fmt.Println("all data is",secondDb)
-	return secondDb
+	//fmt.Println("all data is",secondDb)
+	var NotexpireRecord []record
+
+	for _,vals:=range secondDb{
+		if vals.ExpireAt.After(time.Now()){
+			NotexpireRecord = append(NotexpireRecord,vals)
+		}
+	}
+
+
+	fmt.Println("NotexpireRecord=",NotexpireRecord)
+
+	return NotexpireRecord
 }
