@@ -3,12 +3,14 @@ package database
 import (
 	"fmt"
 	"strconv"
+	"sync"
 	"time"
 )
 
 
-func AddToDatabase(key, value ,ttl string){
+func AddToDatabase(key, value ,ttl string,wg *sync.WaitGroup){
 	
+	//defer wg.Done()
 	db:=Sqlite_setup()
 	ttlInt,err:=strconv.ParseInt(ttl,10,64)
 	if err!=nil{

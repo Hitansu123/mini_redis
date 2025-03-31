@@ -3,18 +3,32 @@ package main
 import (
 	"Building_Redis/database"
 	"Building_Redis/persistance"
+	"Building_Redis/secondaryDB"
 	"bufio"
 	"fmt"
+
 	"os"
 
 	//"strconv"
+	"log"
 	"strings"
 	"sync"
 	"time"
-	"log"
 
+	"gorm.io/gorm"
 	//"github.com/charmbracelet/log"
 )
+func LoadData(hash *sync.Map,wg *sync.WaitGroup){
+	//defer wg.Done()
+	record:=secondaryDB.GetData()
+	if record==nil{
+		fmt.Println("error")
+	}
+	for _,val:=range record{
+		hash.Store(val.Keys_data,val.Values)
+	}
+	fmt.Println("working")
+}
 
 func main() {
 	
@@ -29,9 +43,6 @@ func main() {
 	//}()
 	var hash sync.Map
 
-	wg.Add(1)
-	go persistance.Rdb_snapshort(db)
-	wg.Wait()
 	for {
 		Input := bufio.NewReader(os.Stdin)
 		UserInput, _ := Input.ReadString('\n')
@@ -41,17 +52,19 @@ func main() {
 		case "Ping":
 			fmt.Println("Pong")
 		case "SET":
-			setvalue(&hash, Splits)
+			setvalue(&hash, Splits,&wg,db)
 		case "GET":
-			GetKey(&hash, Splits)
+			fmt.Println("Ok")
+			GetKey(&hash, Splits,&wg)
 		case "DEL":
 			wg.Add(1)
-			go deleteData(Splits[1], &hash, &wg)
-
+			go func(){
+				deleteData(Splits[1], &hash, &wg)
+				wg.Done()
+			}()
 		case "EXPIRE":
 			SetExpire(&hash, Splits, &wg)
 		}
-		wg.Wait()
 	}
 }
 
@@ -70,17 +83,24 @@ func SetExpire(hash *sync.Map, Splits []string, wg *sync.WaitGroup) {
 	}
 }
 
-func GetKey(hash *sync.Map, Splits []string) {
+func GetKey(hash *sync.Map, Splits []string,wg *sync.WaitGroup) {
+	
+	fmt.Println("pk")
+	wg.Add(1)
+	go func() {
+			go LoadData(hash,wg)
+			wg.Done()
+	}()
 	key := Splits[1]
 	
-	vals,_:=hash.Load("Keys_data")
-	fmt.Println(vals)	
+
 	value, ok := hash.Load(key)
 	if ok {
 		fmt.Println(value)
 	} else {
 		fmt.Println("Key does not exsist")
 	}
+	//wg.Wait()
 }
 
 func deleteData(key string, hash *sync.Map, wg *sync.WaitGroup) {
@@ -93,10 +113,19 @@ func deleteData(key string, hash *sync.Map, wg *sync.WaitGroup) {
 	}
 }
 
-func setvalue(hash *sync.Map, Splits []string) {
+func setvalue(hash *sync.Map, Splits []string,wg *sync.WaitGroup,db *gorm.DB) {
 	if len(Splits)<4{
 		log.Fatal("Please add Time to live after value")
 	}
 	hash.Store(Splits[1],Splits[2])
-	database.AddToDatabase(Splits[1],Splits[2],Splits[3])
+	
+	wg.Add(2)
+	go func(){
+		defer wg.Done()
+		persistance.Rdb_snapshort(db)
+	}()
+	go func(){
+		defer wg.Done()
+		database.AddToDatabase(Splits[1],Splits[2],Splits[3],wg)
+	}()
 }

@@ -1,6 +1,6 @@
 package database
 
-import "fmt"
+import() 
 
 
 func GetFromDatabase() []Data{
@@ -9,7 +9,7 @@ func GetFromDatabase() []Data{
 	
 	db.Raw("SELECT * from data").Scan(&Alldata)
 	
-	fmt.Println("all data is",Alldata)
+	//fmt.Println("all data is",Alldata)
 	return Alldata
 }
 
