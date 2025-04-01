@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"Building_Redis/implement_datastructure/lists"
+	"Building_Redis/implement_datastructure/sets"
 	"os"
 
 	//"strconv"
@@ -71,11 +72,19 @@ func main() {
 		case "LPUSH":
 			lists.LPush(Splits[1], Splits[2])
 		case "LPOP":
-			//LPop(Splits[1])
+			lists.LPop(Splits[1])
 		case "RPUSH":
 			lists.RPush(Splits[1], Splits[2])
 		case "LRANGE":
 			lists.LRange(Splits[1])
+		case "RPOP":
+			lists.RPop(Splits[1])
+		case "SADD":
+			sets.SAdd(Splits[1],Splits[2])
+		case "SDEL":
+			sets.SDelete(Splits[1],Splits[2])
+		case "SRANGE":
+			sets.SRange(Splits[1])
 		}
 	}
 }
@@ -122,7 +131,7 @@ func deleteData(key string, hash *sync.Map, wg *sync.WaitGroup) {
 		hash.Delete(key)
 	} else {
 		fmt.Println("Key does not exsist")
-	}
+	}	
 }
 
 func setvalue(hash *sync.Map, Splits []string,wg *sync.WaitGroup,db *gorm.DB) {

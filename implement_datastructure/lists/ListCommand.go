@@ -89,7 +89,29 @@ func LRange(listkey string) {
 	// Print results
 	for _, val := range first {
 		fmt.Println(val.Value)
-	}	
+	}
+}
+
+func LPop(listkey string){
+	var first models.List
+	result := db.Where("list_key = ?", listkey).Order("position ASC").First(&first)
+	if result.Error!=nil{
+		fmt.Println("Key not found")
+		return
+	}
+	fmt.Println(first.Value,first.Position)
+	db.Delete(&first)
+}
+
+func RPop(listkey string){
+	var first models.List
+	result := db.Where("list_key = ?", listkey).Order("position DESC").First(&first)
+	if result.Error!=nil{
+		fmt.Println("Key not found")
+		return
+	}
+	fmt.Println(first.Value,first.Position)
+	db.Delete(&first)
 }
 
 
