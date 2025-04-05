@@ -2,15 +2,16 @@ package secondaryDB
 
 import (
 	"Building_Redis/database"
+	"Building_Redis/models"
+	//Building_Redis/secondaryDB"
 	"fmt"
 	"time"
 )
-
+var db=Setup_secondDB()
 
 func Store_SecondDB(){
 	Alldata:=database.GetFromDatabase()
 	
-	db:=Setup_secondDB()
 	if db==nil{
 		fmt.Println("Failed to set up data")
 	}
@@ -34,4 +35,27 @@ func Store_SecondDB(){
 
 	}
 	fmt.Println("Insetion successful secondary db")	
+}
+
+func Store_ListSecondDB(){
+	AllListdata:=database.GetFromListDatabase()
+	
+	var list_key string 
+	var values string
+	var position int
+
+	for _,val:=range AllListdata{
+		list_key=val.ListKey
+		values=val.Value
+		position=val.Position
+	
+		listdata:=models.List{ListKey: list_key,Value: values,Position: position}
+
+		result:=db.Create(&listdata)
+		if result.Error!=nil{
+			fmt.Println("Cannot insert list data") 
+		}
+	}
+	fmt.Println("successful inserted list data")
+
 }

@@ -16,8 +16,10 @@ type record struct {
 func Rdb_snapshort(db *gorm.DB) {
 	//var Record []record
 	
-			secondaryDB.DeleteFromDB()
-			fmt.Println("Saving")
-			secondaryDB.Store_SecondDB()	
-}
+	secondaryDB.DeleteFromDB()
+	secondaryDB.DeleteFromList()
+	fmt.Println("Saving")
+	secondaryDB.Store_SecondDB()
 		//fmt.Println(Record)
+	secondaryDB.Store_ListSecondDB()	
+}

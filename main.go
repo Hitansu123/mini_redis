@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"fmt"
 
+	"Building_Redis/implement_datastructure/hashes"
 	"Building_Redis/implement_datastructure/lists"
 	"Building_Redis/implement_datastructure/sets"
 	"os"
@@ -28,7 +29,7 @@ func LoadData(hash *sync.Map,wg *sync.WaitGroup){
 		return
 	}
 	for _,val:=range record{
-		hash.Store(val.Keys_data,val.Values)
+		fmt.Println(val.Values)
 	}
 	//fmt.Println("working")
 }
@@ -37,7 +38,7 @@ func main() {
 	
 	db:=database.Sqlite_setup()
 
-	database.DelExpireData()
+
 	var wg sync.WaitGroup
 
 	//erver := NewServer(":3000")
@@ -49,6 +50,12 @@ func main() {
 	var hash sync.Map
 
 	for {
+		wg.Add(1)
+		go func(){	
+			database.DelExpireData()
+			wg.Done()
+		}()
+
 		Input := bufio.NewReader(os.Stdin)
 		UserInput, _ := Input.ReadString('\n')
 		newInput := strings.TrimSpace(UserInput)
@@ -85,6 +92,10 @@ func main() {
 			sets.SDelete(Splits[1],Splits[2])
 		case "SRANGE":
 			sets.SRange(Splits[1])
+		case "HADD":
+			hashes.HADD(Splits[1],Splits[2],Splits[3])
+		case "HGET":
+			hashes.HGET(Splits[1],Splits[2])
 		}
 	}
 }
@@ -112,22 +123,18 @@ func GetKey(hash *sync.Map, Splits []string,wg *sync.WaitGroup) {
 			go LoadData(hash,wg)
 			wg.Done()
 	}()
-	key := Splits[1]
+	//key := Splits[1]
+	//value, ok := hash.Load(key)
 	
-
-	value, ok := hash.Load(key)
-	if ok {
-		fmt.Println(value)
-	} else {
-		fmt.Println("Key does not exsist")
-	}
 	//wg.Wait()
 }
 
 func deleteData(key string, hash *sync.Map, wg *sync.WaitGroup) {
-	defer wg.Done()
+	//defer wg.Done()
+			secondaryDB.DeleteSingleEle(key)
 	_, found := hash.Load(key)
 	if found {
+
 		hash.Delete(key)
 	} else {
 		fmt.Println("Key does not exsist")
